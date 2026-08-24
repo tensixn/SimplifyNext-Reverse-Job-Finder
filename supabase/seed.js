@@ -14,15 +14,18 @@ const supabase = createClient(
 
 const DEMO_USER_ID = process.env.DEMO_USER_ID;
 
-// Edit to match your actual skills/projects.
+// Kept generic on purpose — described by what each thing demonstrates,
+// not by naming a specific person or project, since the generated profile
+// speaks directly to whoever's reading it ("you..."), not about a named
+// individual. Edit the specifics to match your own background if you want.
 const profileInputs = [
-  { kind: 'skill', content: 'React Native / Expo' },
-  { kind: 'skill', content: 'Supabase (Postgres, Auth, RLS)' },
-  { kind: 'skill', content: 'React + Vite web apps' },
-  { kind: 'project', content: 'SummerBuild: built an NTU campus sports pickup app from scratch during a hackathon, full Supabase backend, geolocation court map, dark mode theming' },
-  { kind: 'project', content: 'Stoxed: a personal Telegram bot for tracking stocks/crypto' },
-  { kind: 'project', content: 'Personal portfolio site, plain HTML/CSS/JS deployed on Vercel' },
-  { kind: 'interest', content: 'Software engineering, especially fast-shipping under time pressure' },
+  { kind: 'skill', content: 'Mobile app development (React Native / Expo)' },
+  { kind: 'skill', content: 'Backend and database work with Postgres-based platforms (Supabase)' },
+  { kind: 'skill', content: 'Building and deploying React web apps end to end' },
+  { kind: 'project', content: 'Built a full-stack mobile app from scratch during a hackathon — backend, geolocation features, and theming, shipped in hackathon time' },
+  { kind: 'project', content: 'Built and maintains a personal automation bot that tracks financial data and runs unattended' },
+  { kind: 'project', content: 'Designed and deployed a personal portfolio site from a plain HTML/CSS/JS stack' },
+  { kind: 'interest', content: 'Software engineering, especially shipping fast under a tight deadline' },
 ];
 
 // Fake companies standing in for a live "transformation scanner."
