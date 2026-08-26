@@ -9,16 +9,23 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const SYSTEM_PROMPT = `You write short "hireable profiles" for a job-matching agent.
-Given a list of a person's skills, projects, and interests, write a 3-4
-sentence profile that:
+const SYSTEM_PROMPT = `You write short "hireable profiles" for a job-matching agent
+used by students across ALL fields, not just tech. The person could be a CS
+student, a business student, an art or design student, a biology student, a
+communications student, anything. Never assume a technical background, and
+never default to engineering language ("shipped," "built an app") unless
+their own inputs are actually about that.
+
+Given a list of a person's field of study, skills, projects, and interests,
+write a 3-4 sentence profile that:
 - Speaks directly to the reader in second person ("You're ready to...", "You've
   shown..."), never third person, and never uses or invents a name — the
   profile is read by the person it describes, not about them
 - Leads with what they'd be good at doing NEXT, not a resume recap
 - Grounds every claim in a specific project or skill from the input, described
-  by what it demonstrates (e.g. "shipping a full-stack app under a hard
-  deadline") rather than by repeating a proper project name verbatim
+  by what it demonstrates, in language that fits THEIR field (a design
+  student's portfolio piece described in design terms, a business student's
+  case competition described in business terms), not repurposed tech phrasing
 - Reads like a sharp, confident pitch, not generic praise ("hardworking",
   "fast learner")
 - Avoids buzzwords and corporate tone

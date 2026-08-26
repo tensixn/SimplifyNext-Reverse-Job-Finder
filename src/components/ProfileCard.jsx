@@ -6,6 +6,7 @@ export default function ProfileCard({ userId }) {
   const [summary, setSummary] = useState('');
   const [loading, setLoading] = useState(false);
   const [newInput, setNewInput] = useState('');
+  const [newKind, setNewKind] = useState('skill');
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState('');
 
@@ -37,7 +38,7 @@ export default function ProfileCard({ userId }) {
     if (!newInput.trim()) return;
     setAdding(true);
     setError('');
-    const addResult = await addProfileInput(userId, 'skill', newInput.trim());
+    const addResult = await addProfileInput(userId, newKind, newInput.trim());
     if (addResult.error) {
       setError(addResult.error);
       setAdding(false);
@@ -70,11 +71,17 @@ export default function ProfileCard({ userId }) {
       {error && <p className="error-text">{error}</p>}
 
       <form onSubmit={handleAddInput} className="add-input-form">
+        <select value={newKind} onChange={(e) => setNewKind(e.target.value)} disabled={adding}>
+          <option value="field">Field of study</option>
+          <option value="skill">Skill</option>
+          <option value="project">Project</option>
+          <option value="interest">Interest</option>
+        </select>
         <input
           type="text"
           value={newInput}
           onChange={(e) => setNewInput(e.target.value)}
-          placeholder="Add a new skill or project (e.g. 'just learned Rust')"
+          placeholder="e.g. 'Fine Arts, illustration focus' or 'led a case competition team'"
           disabled={adding}
         />
         <button type="submit" disabled={adding}>

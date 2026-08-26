@@ -110,14 +110,7 @@ export default function CompanyFeed({ userId, refreshKey }) {
             <h3>{m.company?.name}</h3>
             {typeof m.fit_score === 'number' && (
               <div className="signal-meter">
-                <div className="bars">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={`bar ${i < Math.round(m.fit_score / 20) ? 'filled' : ''}`}
-                    />
-                  ))}
-                </div>
+                <div className="bars" style={{ '--fit': `${m.fit_score}%` }} />
                 <span className="score">{m.fit_score}</span>
               </div>
             )}

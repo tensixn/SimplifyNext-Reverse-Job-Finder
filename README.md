@@ -1,8 +1,13 @@
 # Reverse Job Interview
 
 Instead of you applying to jobs, an agent builds a live "hireable profile" from
-your projects/skills and pitches you to companies undergoing transformation —
-autonomously, with pitches personalized to each company's specific change.
+your skills/projects and pitches you to organizations undergoing transformation,
+autonomously, with pitches personalized to each one's specific change.
+
+Built for students in ANY field, not just tech. Every prompt reasons over
+whatever you enter, there's no hardcoded assumption of a technical background.
+The seeded demo data spans tech, business, design, health/science, and media
+so a business, art, or CS student all see something relevant out of the box.
 
 ## Stack
 - **Frontend:** React + Vite
