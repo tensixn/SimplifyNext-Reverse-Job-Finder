@@ -1,5 +1,6 @@
 // Ranks companies against the user's hireable profile, factoring in past
-// pitch outcomes so matching improves over time (the "adapts" part of the brief).
+// pitch outcomes so matching improves over time. Now also returns a 0-100
+// fit_score per company so the ranking is visible, not just implied by order.
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -19,8 +20,15 @@ If the outcome log shows a pattern (e.g. pitches emphasizing a certain
 skill or angle got responses), factor that into which companies you
 prioritize and note it briefly in your reasoning.
 
+Never use em dashes in your reasoning text. Use commas, periods, or "and"/"but" instead.
+Write plainly, like a person explaining a decision out loud, not a corporate summary.
+
+For each match, also give a fit_score from 0-100 reflecting how strong the
+match is right now. Be honest and vary the scores meaningfully — don't
+cluster everything at 85-95.
+
 Respond ONLY with a JSON array, no markdown fences, no preamble:
-[{"company_id": "...", "reason": "1-2 sentences on why this match, right now"}]`;
+[{"company_id": "...", "reason": "1-2 sentences on why this match, right now", "fit_score": 0}]`;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST' });
@@ -64,7 +72,7 @@ export default async function handler(req, res) {
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 500,
+      max_tokens: 600,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userTurn }],
     }),
