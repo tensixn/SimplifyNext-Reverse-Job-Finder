@@ -62,7 +62,11 @@ export default async function handler(req, res) {
       ? pitches.map((p) => `${p.companies?.name ?? 'Unknown'}: ${p.outcome}`).join('\n')
       : 'No pitches sent yet.';
 
-  const userTurn = `Profile:\n${profile[0].summary}\n\nCompany: ${company.name}\nSignal: ${company.signal}\n\nPast pitch outcomes:\n${outcomeLog}`;
+  const roleDetails = [company.role, company.employment_type, company.duration, company.pay_range]
+    .filter(Boolean)
+    .join(', ');
+
+  const userTurn = `Profile:\n${profile[0].summary}\n\nCompany: ${company.name} (${company.location || 'location unknown'})\nSignal: ${company.signal}${roleDetails ? `\nHiring for: ${roleDetails}` : ''}\n\nPast pitch outcomes:\n${outcomeLog}`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

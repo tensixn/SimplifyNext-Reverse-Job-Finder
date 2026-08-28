@@ -12,9 +12,16 @@ const supabase = createClient(
 const SYSTEM_PROMPT = `You match a candidate's profile against companies
 undergoing some kind of transformation (funding, pivot, restructuring,
 hiring sprint). Given the profile, a list of companies with their
-transformation signal, and a log of which past pitches got responses vs
-not, pick the top 3 companies that are the best fit RIGHT NOW because of
-their specific transformation — not just general fit.
+transformation signal, location, and role details (employment type,
+duration, pay), and a log of which past pitches got responses vs not, pick
+the top 3 companies that are the best fit RIGHT NOW because of their
+specific transformation — not just general fit.
+
+This is a local, Singapore-first tool. All else being roughly equal, prefer
+companies based in Singapore over companies elsewhere, since that's who the
+candidate can realistically start a conversation with right now. Don't
+force a bad match just because it's local, but treat "in Singapore" as a
+real point in a company's favor.
 
 If the outcome log shows a pattern (e.g. pitches emphasizing a certain
 skill or angle got responses), factor that into which companies you
@@ -58,7 +65,12 @@ export default async function handler(req, res) {
       : 'No pitches sent yet.';
 
   const companyList = companies
-    .map((c) => `id: ${c.id} | ${c.name} (${c.industry}) — ${c.signal}`)
+    .map((c) => {
+      const details = [c.role, c.employment_type, c.duration, c.pay_range]
+        .filter(Boolean)
+        .join(', ');
+      return `id: ${c.id} | ${c.name} (${c.industry}) | ${c.location || 'location unknown'} — ${c.signal}${details ? ` | Hiring for: ${details}` : ''}`;
+    })
     .join('\n');
 
   const userTurn = `Profile:\n${profile[0].summary}\n\nCompanies:\n${companyList}\n\nPast pitch outcomes:\n${outcomeLog}`;

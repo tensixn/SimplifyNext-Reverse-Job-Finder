@@ -19,7 +19,9 @@ if there's ONE company not yet pitched that is a strong enough match to
 flag unprompted, right now.
 
 Only flag a company if it's a genuinely strong, specific match — not just
-"any company left." If nothing stands out, say so.
+"any company left." If nothing stands out, say so. This is a
+Singapore-first tool, so a Singapore-based company is a real point in its
+favor, all else being equal.
 
 Never use em dashes in your reasoning text. Use commas, periods, or "and"/"but" instead.
 Write plainly, like a person explaining a decision out loud, not a corporate summary.
@@ -55,7 +57,7 @@ export default async function handler(req, res) {
   }
 
   const companyList = unpitched
-    .map((c) => `id: ${c.id} | ${c.name} (${c.industry}) — ${c.signal}`)
+    .map((c) => `id: ${c.id} | ${c.name} (${c.industry}) | ${c.location || 'location unknown'} — ${c.signal}`)
     .join('\n');
 
   const userTurn = `Profile:\n${profile[0].summary}\n\nNot-yet-pitched companies:\n${companyList}`;

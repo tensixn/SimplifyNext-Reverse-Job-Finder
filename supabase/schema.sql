@@ -22,6 +22,13 @@ create table if not exists companies (
   name text not null,
   signal text not null,
   industry text,
+  location text default 'Singapore',   -- city/area, e.g. "Raffles Place, Singapore"
+  url text,                             -- careers page / listing link shown to candidates
+  role text,                            -- the role/title being hired for
+  employment_type text,                 -- 'Internship' | 'Full-time' | 'Part-time' | 'Contract'
+  duration text,                        -- e.g. "3 months", "Permanent"
+  pay_range text,                       -- e.g. "S$2,800 - S$3,500/mo"
+  requirements text,                    -- 1-2 sentence summary of what they're looking for
   created_at timestamptz not null default now()
 );
 
@@ -36,3 +43,4 @@ create table if not exists pitches (
 );
 
 create index if not exists pitches_user_idx on pitches (user_id, created_at desc);
+create index if not exists companies_location_idx on companies (location);

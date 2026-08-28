@@ -127,10 +127,19 @@ export default function CompanyFeed({ userId, refreshKey }) {
 
       {matches.map((m) => {
         const pitchState = pitches[m.company_id];
+        const jobDetails = [
+          m.company?.role,
+          m.company?.employment_type,
+          m.company?.duration,
+          m.company?.pay_range,
+        ].filter(Boolean);
         return (
           <div key={m.company_id} className="company-card">
             <div className="company-card-top">
-              <h3>{m.company?.name}</h3>
+              <div className="company-card-title">
+                <h3>{m.company?.name}</h3>
+                {m.company?.location && <span className="chip chip-location">{m.company.location}</span>}
+              </div>
               {typeof m.fit_score === 'number' && (
                 <div className="signal-meter">
                   <div className="bars" style={{ '--fit': `${m.fit_score}%` }} />
@@ -139,6 +148,28 @@ export default function CompanyFeed({ userId, refreshKey }) {
               )}
             </div>
             <p className="signal">{m.company?.signal}</p>
+
+            {jobDetails.length > 0 && (
+              <div className="job-details">
+                {jobDetails.map((d, i) => (
+                  <span key={i} className="chip">
+                    {d}
+                  </span>
+                ))}
+              </div>
+            )}
+            {m.company?.requirements && (
+              <p className="requirements">
+                <span className="requirements-label">Looking for </span>
+                {m.company.requirements}
+              </p>
+            )}
+            {m.company?.url && (
+              <a href={m.company.url} target="_blank" rel="noreferrer" className="listing-link">
+                View listing ↗
+              </a>
+            )}
+
             <p className="reason">{m.reason}</p>
 
             {pitchState ? (
@@ -164,6 +195,7 @@ export default function CompanyFeed({ userId, refreshKey }) {
                     <button
                       onClick={() => markOutcome(m.company_id, 'no_response')}
                       disabled={markingId === m.company_id}
+                      className="ghost"
                     >
                       {markingId === m.company_id ? <span className="spinner" /> : null}
                       Mark: No response
