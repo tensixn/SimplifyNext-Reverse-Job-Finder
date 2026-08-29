@@ -39,5 +39,12 @@ export const checkNewMatches = (userId) =>
 export const addProfileInput = (userId, kind, content) =>
   post('/api/add-profile-input', { user_id: userId, kind, content });
 
+// Bulk version, used when several suggested skills are picked at once.
+export const addProfileInputs = (userId, kind, contents) =>
+  post('/api/add-profile-input', { user_id: userId, kind, contents });
+
+export const suggestSkills = (userId) =>
+  post('/api/suggest-skills', { user_id: userId });
+
 export const resetDemo = (userId) =>
   post('/api/reset-demo', { user_id: userId });

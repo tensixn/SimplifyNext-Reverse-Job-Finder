@@ -1,19 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-
-// Same three-shape normalizer as ProfileCard, kept local since this view
-// reads other users' profiles directly rather than through the API layer.
-function parsePoints(raw) {
-  if (!raw) return [];
-  let parsed;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return [{ label: raw, why: '' }];
-  }
-  if (!Array.isArray(parsed)) return [];
-  return parsed.map((p) => (typeof p === 'string' ? { label: p, why: '' } : p));
-}
+import { parsePoints, groupPoints } from '../lib/profilePoints';
 
 export default function RecruiterView({ refreshKey }) {
   const [companies, setCompanies] = useState([]);
@@ -146,16 +133,23 @@ export default function RecruiterView({ refreshKey }) {
 
       {candidates.map(({ pitch, points }) => (
         <div key={pitch.id} className="candidate-card">
-          {points.length > 0 && (
-            <ul className="profile-points compact">
-              {points.map((pt, i) => (
-                <li key={i}>
-                  <span className="point-label">{pt.label}</span>
-                  {pt.why && <span className="point-why">{pt.why}</span>}
-                </li>
-              ))}
-            </ul>
-          )}
+          <div className="profile-groups compact">
+            {groupPoints(points).map((group) => (
+              <section key={group.kind} className="profile-group">
+                {group.heading && (
+                  <h4 className="profile-group-heading">{group.heading}</h4>
+                )}
+                <ul className="profile-points compact">
+                  {group.points.map((pt, i) => (
+                    <li key={i}>
+                      <span className="point-label">{pt.label}</span>
+                      {pt.why && <span className="point-why">{pt.why}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
 
           <p className="pitch">{pitch.pitch_text}</p>
 

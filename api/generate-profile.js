@@ -18,7 +18,9 @@ technical background, and never default to engineering language ("shipped,"
 "built an app") unless their own inputs are actually about that.
 
 Given a list of a person's field of study, skills, projects, and interests,
-produce 4-6 points, each with two short parts:
+produce 5-8 points. Each point has three parts:
+- "kind": which section it belongs under. Exactly one of "field", "project",
+  "skill", or "interest". Use the kind of the input it came from.
 - "label": the skill, project, or field itself, 2-5 words, no sentence, just
   the thing (e.g. "Case competition, top 3 finish" or "React Native")
 - "why": one short phrase (under 10 words) on why it matters to a recruiter,
@@ -26,20 +28,23 @@ produce 4-6 points, each with two short parts:
   not "This demonstrates that the candidate can build things under pressure")
 
 Rules:
+- Every point MUST have a "kind" from that list of four. Never invent others.
+- At most ONE point with kind "field". Omit it entirely if no field of study
+  was given. Its label is the field itself (e.g. "Business Administration,
+  marketing focus")
+- Cover whichever kinds the inputs actually contain. Don't pad a section with
+  a weak point just to fill it, and don't drop a section that has real input
 - Uses language that fits THEIR field (a design student's work described in
   design terms, a business student's in business terms), not tech phrasing
   forced onto a non-technical background
 - Never uses a name, "you," "they," or "I" anywhere
 - Never uses em dashes. Use commas instead
 - No buzzwords, no inflated words like "seamless," "robust," "elevate,"
-  "unlock," "leverage," or "boasts"
+  "unlock," or "leverage"
 - Keep both label and why SHORT. This is a scannable list, not sentences
 
-If a field of study was given, the first point's label should be that field
-(e.g. "Business Administration, marketing focus").
-
 Respond ONLY with a JSON array, no markdown fences, no preamble:
-[{"label": "...", "why": "..."}, ...]`;
+[{"kind": "field", "label": "...", "why": "..."}, ...]`;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST' });
@@ -67,7 +72,7 @@ export default async function handler(req, res) {
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 400,
+      max_tokens: 700,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: inputText }],
     }),
