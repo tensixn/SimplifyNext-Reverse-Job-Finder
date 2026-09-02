@@ -15,7 +15,7 @@ export default function App() {
   const [view, setView] = useState('seeker'); // 'seeker' | 'recruiter'
 
   async function handleReset() {
-    if (!window.confirm('Clear all pitches and outcomes for this demo run?')) return;
+    if (!window.confirm('Clear this profile, its skills/projects, and all pitches and outcomes for this demo run?')) return;
     setResetting(true);
     await resetDemo(DEMO_USER_ID);
     setRefreshKey((k) => k + 1);
@@ -64,7 +64,7 @@ export default function App() {
 
       {view === 'seeker' ? (
         <>
-          <ProfileCard userId={DEMO_USER_ID} />
+          <ProfileCard userId={DEMO_USER_ID} refreshKey={refreshKey} />
           <CompanyFeed userId={DEMO_USER_ID} refreshKey={refreshKey} />
           <PitchHistory userId={DEMO_USER_ID} refreshKey={refreshKey} />
         </>

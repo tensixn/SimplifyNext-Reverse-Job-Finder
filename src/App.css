@@ -684,6 +684,12 @@ button.ghost.small:hover:not(:disabled) {
   margin: 12px 0 0;
 }
 
+.saved-text {
+  font-size: var(--text-caption);
+  color: var(--muted);
+  margin: 8px 0 0;
+}
+
 .empty-state {
   font-size: var(--text-body);
   color: var(--muted);

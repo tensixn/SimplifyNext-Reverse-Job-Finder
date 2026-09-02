@@ -29,11 +29,16 @@ produce 5-8 points. Each point has three parts:
 
 Rules:
 - Every point MUST have a "kind" from that list of four. Never invent others.
-- At most ONE point with kind "field". Omit it entirely if no field of study
-  was given. Its label is the field itself (e.g. "Business Administration,
-  marketing focus")
+- At most ONE point with kind "field". If multiple field inputs are given,
+  use only the most recently added one (marked "(just added)" or latest in
+  the list) and ignore the older ones. Omit "field" entirely if none was given.
+  Its label is the field itself (e.g. "Business Administration, marketing focus")
 - Cover whichever kinds the inputs actually contain. Don't pad a section with
   a weak point just to fill it, and don't drop a section that has real input
+- Inputs marked "(just added)" were added in this most recent edit. Give them
+  priority: they should almost always earn a point of their own unless truly
+  redundant with something already covered, even if it means dropping a
+  weaker, older input to make room within the 5-8 point budget
 - Uses language that fits THEIR field (a design student's work described in
   design terms, a business student's in business terms), not tech phrasing
   forced onto a non-technical background
@@ -51,17 +56,39 @@ export default async function handler(req, res) {
 
   const { user_id } = req.body;
 
-  const { data: inputs, error: inputError } = await supabase
+  const { data: rawInputs, error: inputError } = await supabase
     .from('profile_inputs')
     .select('*')
-    .eq('user_id', user_id);
+    .eq('user_id', user_id)
+    .order('created_at', { ascending: true });
 
   if (inputError) return res.status(500).json({ error: inputError.message });
-  if (!inputs || inputs.length === 0) {
+  if (!rawInputs || rawInputs.length === 0) {
     return res.status(400).json({ error: 'No profile inputs yet' });
   }
 
-  const inputText = inputs.map((i) => `[${i.kind}] ${i.content}`).join('\n');
+  // Repeated testing/typos accumulate duplicate or near-duplicate inputs
+  // over time (same kind+content added more than once). Collapse those to
+  // their most recent occurrence so old noise doesn't crowd out what the
+  // person actually just added.
+  const seen = new Map();
+  for (const input of rawInputs) {
+    const key = `${input.kind}::${input.content.trim().toLowerCase()}`;
+    seen.set(key, input);
+  }
+  const inputs = [...seen.values()].sort(
+    (a, b) => new Date(a.created_at) - new Date(b.created_at)
+  );
+
+  // Flag whatever landed in the last minute (i.e. what this request's
+  // "Add & Regenerate" click just inserted) so the prompt can weight it.
+  const cutoff = Date.now() - 60_000;
+  const inputText = inputs
+    .map((i) => {
+      const justAdded = new Date(i.created_at).getTime() >= cutoff;
+      return `[${i.kind}] ${i.content}${justAdded ? ' (just added)' : ''}`;
+    })
+    .join('\n');
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

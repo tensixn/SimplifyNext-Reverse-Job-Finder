@@ -8,7 +8,7 @@ import {
 } from '../lib/api';
 import { parsePoints, normalizePoints, groupPoints } from '../lib/profilePoints';
 
-export default function ProfileCard({ userId }) {
+export default function ProfileCard({ userId, refreshKey }) {
   const [points, setPoints] = useState([]);
   const [working, setWorking] = useState(false);
   const [newInput, setNewInput] = useState('');
@@ -34,7 +34,10 @@ export default function ProfileCard({ userId }) {
 
   useEffect(() => {
     load();
-  }, [userId]);
+    setSuggestions([]);
+    setSelected([]);
+    setHasSuggested(false);
+  }, [userId, refreshKey]);
 
   async function regenerate() {
     const result = await generateProfile(userId);

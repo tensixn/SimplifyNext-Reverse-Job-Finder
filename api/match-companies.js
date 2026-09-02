@@ -12,10 +12,16 @@ const supabase = createClient(
 const SYSTEM_PROMPT = `You match a candidate's profile against companies
 undergoing some kind of transformation (funding, pivot, restructuring,
 hiring sprint). Given the profile, a list of companies with their
-transformation signal, location, and role details (employment type,
-duration, pay), and a log of which past pitches got responses vs not, pick
-the top 3 companies that are the best fit RIGHT NOW because of their
-specific transformation — not just general fit.
+transformation signal, location, role details (employment type, duration,
+pay), and what each company says it's looking for in a candidate, and a log
+of which past pitches got responses vs not, pick the top 3 companies that
+are the best fit RIGHT NOW because of their specific transformation — not
+just general fit.
+
+When a company states what it's looking for, treat that as a real
+requirement to weigh, not decoration. A company whose stated need doesn't
+match anything in the profile should score lower even if its transformation
+signal is compelling.
 
 This is a local, Singapore-first tool. All else being roughly equal, prefer
 companies based in Singapore over companies elsewhere, since that's who the
@@ -69,7 +75,7 @@ export default async function handler(req, res) {
       const details = [c.role, c.employment_type, c.duration, c.pay_range]
         .filter(Boolean)
         .join(', ');
-      return `id: ${c.id} | ${c.name} (${c.industry}) | ${c.location || 'location unknown'} — ${c.signal}${details ? ` | Hiring for: ${details}` : ''}`;
+      return `id: ${c.id} | ${c.name} (${c.industry}) | ${c.location || 'location unknown'} — ${c.signal}${details ? ` | Hiring for: ${details}` : ''}${c.requirements ? ` | Looking for: ${c.requirements}` : ''}`;
     })
     .join('\n');
 

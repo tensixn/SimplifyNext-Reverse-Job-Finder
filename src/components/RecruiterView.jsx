@@ -8,6 +8,10 @@ export default function RecruiterView({ refreshKey }) {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [markingId, setMarkingId] = useState(null);
+  const [reqDraft, setReqDraft] = useState('');
+  const [savingReq, setSavingReq] = useState(false);
+  const [reqSaved, setReqSaved] = useState(false);
+  const [reqError, setReqError] = useState('');
 
   useEffect(() => {
     supabase
@@ -24,6 +28,38 @@ export default function RecruiterView({ refreshKey }) {
     if (!selectedId) return;
     loadCandidates(selectedId);
   }, [selectedId, refreshKey]);
+
+  // Keep the requirements draft in sync whenever the selected company changes,
+  // so switching companies doesn't carry over the previous one's edits.
+  useEffect(() => {
+    const company = companies.find((c) => c.id === selectedId);
+    setReqDraft(company?.requirements || '');
+    setReqSaved(false);
+    setReqError('');
+  }, [selectedId, companies]);
+
+  async function handleSaveRequirements(e) {
+    e.preventDefault();
+    if (!selectedId) return;
+    setSavingReq(true);
+    setReqSaved(false);
+    setReqError('');
+
+    const { error } = await supabase
+      .from('companies')
+      .update({ requirements: reqDraft.trim() })
+      .eq('id', selectedId);
+
+    if (error) {
+      setReqError(error.message);
+    } else {
+      setCompanies((prev) =>
+        prev.map((c) => (c.id === selectedId ? { ...c, requirements: reqDraft.trim() } : c))
+      );
+      setReqSaved(true);
+    }
+    setSavingReq(false);
+  }
 
   async function loadCandidates(companyId) {
     setLoading(true);
@@ -110,11 +146,30 @@ export default function RecruiterView({ refreshKey }) {
             </div>
           )}
 
-          {company.requirements && (
-            <p className="requirements">
-              <span className="requirements-label">Looking for </span>
-              {company.requirements}
-            </p>
+          <form onSubmit={handleSaveRequirements} className="add-input-form">
+            <input
+              type="text"
+              value={reqDraft}
+              onChange={(e) => {
+                setReqDraft(e.target.value);
+                setReqSaved(false);
+              }}
+              placeholder="What are you looking for in a candidate? e.g. 'Comfortable with financial modelling and fast-paced ops'"
+              disabled={savingReq}
+            />
+            <button type="submit" disabled={savingReq || reqDraft.trim() === (company.requirements || '')}>
+              {savingReq ? (
+                <>
+                  <span className="spinner" /> Saving
+                </>
+              ) : (
+                'Save requirements'
+              )}
+            </button>
+          </form>
+          {reqError && <p className="error-text">{reqError}</p>}
+          {reqSaved && !reqError && (
+            <p className="saved-text">Saved — this will be used the next time a candidate finds matches.</p>
           )}
 
           {company.url && (

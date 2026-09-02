@@ -1,7 +1,6 @@
-// Clears this user's pitches (and optionally profile) so the demo flow
-// can be re-run cleanly without re-seeding from scratch. Keeps companies
-// and profile_inputs intact — just wipes the "state" that accumulates
-// as you click through a demo.
+// Clears this user's pitches, profile inputs, and generated profile so the
+// demo can be re-run from a truly blank slate. Keeps `companies` intact,
+// since that's shared seed data, not per-user demo state.
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -16,9 +15,11 @@ export default async function handler(req, res) {
   const { user_id } = req.body;
   if (!user_id) return res.status(400).json({ error: 'user_id is required' });
 
-  const { error } = await supabase.from('pitches').delete().eq('user_id', user_id);
-
-  if (error) return res.status(500).json({ error: error.message });
+  const tables = ['pitches', 'hireable_profile', 'profile_inputs'];
+  for (const table of tables) {
+    const { error } = await supabase.from(table).delete().eq('user_id', user_id);
+    if (error) return res.status(500).json({ error: error.message });
+  }
 
   return res.status(200).json({ reset: true });
 }
