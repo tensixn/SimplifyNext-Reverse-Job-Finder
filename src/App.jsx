@@ -23,54 +23,71 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <div className="app-top">
-        <div className="brand">
-          <span className="logomark">RJ</span>
-          <div>
-            <h1>Reverse Job Interview</h1>
-            <p className="tagline">Don't apply to jobs. Let them apply to you. Singapore, first.</p>
-          </div>
+    <>
+      <section className="hero-band">
+        <div className="hero-glow" aria-hidden="true" />
+        <div className="hero-inner">
+          <p className="hero-eyebrow">
+            <span className="prompt-symbol">&gt;</span>
+            <span className="prompt-text">reverse --job-interview</span>
+            <span className="cursor" aria-hidden="true" />
+          </p>
+          <h1 className="hero-title">
+            Don't apply to jobs.
+            <br />
+            <span className="accent-text">Let them apply to you.</span>
+          </h1>
         </div>
-        <button onClick={handleReset} disabled={resetting} className="reset-button">
-          {resetting ? (
-            <>
-              <span className="spinner" /> Resetting
-            </>
-          ) : (
-            'Reset demo'
-          )}
-        </button>
-      </div>
+      </section>
 
-      <div className="view-switch" role="tablist" aria-label="Choose a view">
-        <button
-          role="tab"
-          aria-selected={view === 'seeker'}
-          className={view === 'seeker' ? 'active' : ''}
-          onClick={() => setView('seeker')}
-        >
-          Job seeker
-        </button>
-        <button
-          role="tab"
-          aria-selected={view === 'recruiter'}
-          className={view === 'recruiter' ? 'active' : ''}
-          onClick={() => setView('recruiter')}
-        >
-          Recruiter
-        </button>
-      </div>
+      <div className="app" id="app-panel">
+        <div className="app-top">
+          <div className="brand">
+            <span className="logomark">RJ</span>
+            <div>
+              <p className="brand-word">Reverse Job Interview</p>
+            </div>
+          </div>
+          <button onClick={handleReset} disabled={resetting} className="reset-button">
+            {resetting ? (
+              <>
+                <span className="spinner" /> Resetting
+              </>
+            ) : (
+              'Reset demo'
+            )}
+          </button>
+        </div>
 
-      {view === 'seeker' ? (
-        <>
-          <ProfileCard userId={DEMO_USER_ID} refreshKey={refreshKey} />
-          <CompanyFeed userId={DEMO_USER_ID} refreshKey={refreshKey} />
-          <PitchHistory userId={DEMO_USER_ID} refreshKey={refreshKey} />
-        </>
-      ) : (
-        <RecruiterView refreshKey={refreshKey} />
-      )}
-    </div>
+        <div className="view-switch" role="tablist" aria-label="Choose a view">
+          <button
+            role="tab"
+            aria-selected={view === 'seeker'}
+            className={view === 'seeker' ? 'active' : ''}
+            onClick={() => setView('seeker')}
+          >
+            Job seeker
+          </button>
+          <button
+            role="tab"
+            aria-selected={view === 'recruiter'}
+            className={view === 'recruiter' ? 'active' : ''}
+            onClick={() => setView('recruiter')}
+          >
+            Recruiter
+          </button>
+        </div>
+
+        {view === 'seeker' ? (
+          <>
+            <ProfileCard userId={DEMO_USER_ID} refreshKey={refreshKey} />
+            <CompanyFeed userId={DEMO_USER_ID} refreshKey={refreshKey} />
+            <PitchHistory userId={DEMO_USER_ID} refreshKey={refreshKey} />
+          </>
+        ) : (
+          <RecruiterView refreshKey={refreshKey} />
+        )}
+      </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { parsePoints, groupPoints } from '../lib/profilePoints';
+import Dropdown from './Dropdown';
 
 export default function RecruiterView({ refreshKey }) {
   const [companies, setCompanies] = useState([]);
@@ -144,13 +145,13 @@ export default function RecruiterView({ refreshKey }) {
           <span className="eyebrow">Recruiter view</span>
           <h2>Inbound Candidates</h2>
         </div>
-        <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
-          {companies.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        <Dropdown
+          value={selectedId}
+          onChange={setSelectedId}
+          options={companies.map((c) => ({ value: c.id, label: c.name }))}
+          accent="blue"
+          ariaLabel="Company"
+        />
       </div>
 
       {company && (

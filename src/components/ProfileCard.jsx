@@ -7,6 +7,14 @@ import {
   suggestSkills,
 } from '../lib/api';
 import { parsePoints, normalizePoints, groupPoints } from '../lib/profilePoints';
+import Dropdown from './Dropdown';
+
+const INPUT_KINDS = [
+  { value: 'field', label: 'Field of study' },
+  { value: 'skill', label: 'Skill' },
+  { value: 'project', label: 'Project' },
+  { value: 'interest', label: 'Interest' },
+];
 
 export default function ProfileCard({ userId, refreshKey }) {
   const [points, setPoints] = useState([]);
@@ -142,12 +150,14 @@ export default function ProfileCard({ userId, refreshKey }) {
       {error && <p className="error-text">{error}</p>}
 
       <form onSubmit={handleSubmit} className="add-input-form">
-        <select value={newKind} onChange={(e) => setNewKind(e.target.value)} disabled={busy}>
-          <option value="field">Field of study</option>
-          <option value="skill">Skill</option>
-          <option value="project">Project</option>
-          <option value="interest">Interest</option>
-        </select>
+        <Dropdown
+          value={newKind}
+          onChange={setNewKind}
+          options={INPUT_KINDS}
+          disabled={busy}
+          accent="mint"
+          ariaLabel="Input type"
+        />
         <input
           type="text"
           value={newInput}
