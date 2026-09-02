@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { parsePoints, groupPoints } from '../lib/profilePoints';
 
@@ -30,12 +30,19 @@ export default function RecruiterView({ refreshKey }) {
   }, [selectedId, refreshKey]);
 
   // Keep the requirements draft in sync whenever the selected company changes,
-  // so switching companies doesn't carry over the previous one's edits.
+  // so switching companies doesn't carry over the previous one's edits. Only
+  // clear the saved/error state on an actual company switch, not on every
+  // `companies` update — a successful save updates `companies` too, and that
+  // was wiping out the "Saved" confirmation before it could ever be seen.
+  const prevSelectedId = useRef(null);
   useEffect(() => {
     const company = companies.find((c) => c.id === selectedId);
     setReqDraft(company?.requirements || '');
-    setReqSaved(false);
-    setReqError('');
+    if (prevSelectedId.current !== selectedId) {
+      setReqSaved(false);
+      setReqError('');
+      prevSelectedId.current = selectedId;
+    }
   }, [selectedId, companies]);
 
   async function handleSaveRequirements(e) {
