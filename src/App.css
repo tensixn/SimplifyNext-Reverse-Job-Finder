@@ -690,6 +690,53 @@ button.ghost.small:hover:not(:disabled) {
   margin: 8px 0 0;
 }
 
+.requirements-editor {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.requirement-chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 0;
+}
+
+.requirement-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 7px 10px 7px 13px;
+  font-size: var(--text-caption);
+}
+
+.requirement-chip button {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+}
+
+.requirement-chip button:hover:not(:disabled) {
+  color: var(--accent-ink);
+}
+
+.requirement-chip button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .empty-state {
   font-size: var(--text-body);
   color: var(--muted);

@@ -8,9 +8,12 @@ export default function RecruiterView({ refreshKey }) {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [markingId, setMarkingId] = useState(null);
-  const [reqDraft, setReqDraft] = useState('');
+  // Multiple requirements are stored as a single "; "-joined string in the
+  // existing `requirements` column (no schema change needed), and split back
+  // into a list here so they can be added/removed individually.
+  const [reqList, setReqList] = useState([]);
+  const [newReq, setNewReq] = useState('');
   const [savingReq, setSavingReq] = useState(false);
-  const [reqSaved, setReqSaved] = useState(false);
   const [reqError, setReqError] = useState('');
 
   useEffect(() => {
@@ -29,43 +32,58 @@ export default function RecruiterView({ refreshKey }) {
     loadCandidates(selectedId);
   }, [selectedId, refreshKey]);
 
-  // Keep the requirements draft in sync whenever the selected company changes,
+  // Keep the requirements list in sync whenever the selected company changes,
   // so switching companies doesn't carry over the previous one's edits. Only
-  // clear the saved/error state on an actual company switch, not on every
+  // clear the error state on an actual company switch, not on every
   // `companies` update — a successful save updates `companies` too, and that
-  // was wiping out the "Saved" confirmation before it could ever be seen.
+  // was wiping out feedback before it could ever be seen.
   const prevSelectedId = useRef(null);
   useEffect(() => {
     const company = companies.find((c) => c.id === selectedId);
-    setReqDraft(company?.requirements || '');
+    setReqList(parseRequirements(company?.requirements || ''));
     if (prevSelectedId.current !== selectedId) {
-      setReqSaved(false);
       setReqError('');
       prevSelectedId.current = selectedId;
     }
   }, [selectedId, companies]);
 
-  async function handleSaveRequirements(e) {
-    e.preventDefault();
-    if (!selectedId) return;
+  function parseRequirements(text) {
+    return text
+      ? text.split(';').map((s) => s.trim()).filter(Boolean)
+      : [];
+  }
+
+  async function persistRequirements(list) {
     setSavingReq(true);
-    setReqSaved(false);
     setReqError('');
+    const joined = list.join('; ');
 
     const { error } = await supabase
       .from('companies')
-      .update({ requirements: reqDraft.trim() })
+      .update({ requirements: joined })
       .eq('id', selectedId);
 
     if (error) {
       setReqError(error.message);
     } else {
       setCompanies((prev) =>
-        prev.map((c) => (c.id === selectedId ? { ...c, requirements: reqDraft.trim() } : c))
+        prev.map((c) => (c.id === selectedId ? { ...c, requirements: joined } : c))
       );
-      setReqSaved(true);
+      setReqList(list);
     }
     setSavingReq(false);
+  }
+
+  async function handleAddRequirement(e) {
+    e.preventDefault();
+    const trimmed = newReq.trim();
+    if (!trimmed) return;
+    await persistRequirements([...reqList, trimmed]);
+    setNewReq('');
+  }
+
+  async function handleRemoveRequirement(index) {
+    await persistRequirements(reqList.filter((_, i) => i !== index));
   }
 
   async function loadCandidates(companyId) {
@@ -153,31 +171,49 @@ export default function RecruiterView({ refreshKey }) {
             </div>
           )}
 
-          <form onSubmit={handleSaveRequirements} className="add-input-form">
-            <input
-              type="text"
-              value={reqDraft}
-              onChange={(e) => {
-                setReqDraft(e.target.value);
-                setReqSaved(false);
-              }}
-              placeholder="What are you looking for in a candidate? e.g. 'Comfortable with financial modelling and fast-paced ops'"
-              disabled={savingReq}
-            />
-            <button type="submit" disabled={savingReq || reqDraft.trim() === (company.requirements || '')}>
-              {savingReq ? (
-                <>
-                  <span className="spinner" /> Saving
-                </>
-              ) : (
-                'Save requirements'
-              )}
-            </button>
-          </form>
-          {reqError && <p className="error-text">{reqError}</p>}
-          {reqSaved && !reqError && (
-            <p className="saved-text">Saved — this will be used the next time a candidate finds matches.</p>
-          )}
+          <div className="requirements-editor">
+            <span className="requirements-label">Looking for</span>
+
+            {reqList.length > 0 ? (
+              <ul className="requirement-chips">
+                {reqList.map((r, i) => (
+                  <li key={i} className="requirement-chip">
+                    <span>{r}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveRequirement(i)}
+                      disabled={savingReq}
+                      aria-label={`Remove requirement: ${r}`}
+                    >
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="empty-state">No specific requirements added yet.</p>
+            )}
+
+            <form onSubmit={handleAddRequirement} className="add-input-form">
+              <input
+                type="text"
+                value={newReq}
+                onChange={(e) => setNewReq(e.target.value)}
+                placeholder="Add a requirement, e.g. 'Comfortable with financial modelling'"
+                disabled={savingReq}
+              />
+              <button type="submit" disabled={savingReq || !newReq.trim()}>
+                {savingReq ? (
+                  <>
+                    <span className="spinner" /> Saving
+                  </>
+                ) : (
+                  'Add requirement'
+                )}
+              </button>
+            </form>
+            {reqError && <p className="error-text">{reqError}</p>}
+          </div>
 
           {company.url && (
             <a href={company.url} target="_blank" rel="noreferrer" className="listing-link">
