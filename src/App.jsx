@@ -1,25 +1,59 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ProfileCard from './components/ProfileCard';
 import CompanyFeed from './components/CompanyFeed';
 import PitchHistory from './components/PitchHistory';
 import RecruiterView from './components/RecruiterView';
+import AuthScreen from './components/AuthScreen';
+import { supabase } from './lib/supabaseClient';
 import { resetDemo } from './lib/api';
 import './App.css';
 
-// Swap for real Supabase auth later. Fixed ID is enough for a hackathon demo.
-const DEMO_USER_ID = import.meta.env.VITE_DEMO_USER_ID;
-
 export default function App() {
+  // undefined = still checking for an existing session, null = signed out,
+  // object = signed in. Every table (profile_inputs, hireable_profile,
+  // pitches) is already keyed by user_id, so the real auth user's id is a
+  // drop-in replacement for the old hardcoded DEMO_USER_ID.
+  const [session, setSession] = useState(undefined);
   const [refreshKey, setRefreshKey] = useState(0);
   const [resetting, setResetting] = useState(false);
   const [view, setView] = useState('seeker'); // 'seeker' | 'recruiter'
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (session === undefined) {
+    return (
+      <div className="app auth-loading">
+        <span className="spinner" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <AuthScreen />;
+  }
+
+  const userId = session.user.id;
+
   async function handleReset() {
     if (!window.confirm('Clear this profile, its skills/projects, and all pitches and outcomes for this demo run?')) return;
     setResetting(true);
-    await resetDemo(DEMO_USER_ID);
+    await resetDemo(userId);
     setRefreshKey((k) => k + 1);
     setResetting(false);
+  }
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
   }
 
   return (
@@ -48,15 +82,21 @@ export default function App() {
               <p className="brand-word">Reverse Job Interview</p>
             </div>
           </div>
-          <button onClick={handleReset} disabled={resetting} className="reset-button">
-            {resetting ? (
-              <>
-                <span className="spinner" /> Resetting
-              </>
-            ) : (
-              'Reset demo'
-            )}
-          </button>
+          <div className="app-top-actions">
+            <span className="signed-in-as">{session.user.email}</span>
+            <button onClick={handleReset} disabled={resetting} className="reset-button">
+              {resetting ? (
+                <>
+                  <span className="spinner" /> Resetting
+                </>
+              ) : (
+                'Reset demo'
+              )}
+            </button>
+            <button onClick={handleSignOut} className="reset-button">
+              Sign out
+            </button>
+          </div>
         </div>
 
         <div className="view-switch" role="tablist" aria-label="Choose a view">
@@ -80,9 +120,9 @@ export default function App() {
 
         {view === 'seeker' ? (
           <>
-            <ProfileCard userId={DEMO_USER_ID} refreshKey={refreshKey} />
-            <CompanyFeed userId={DEMO_USER_ID} refreshKey={refreshKey} />
-            <PitchHistory userId={DEMO_USER_ID} refreshKey={refreshKey} />
+            <ProfileCard userId={userId} refreshKey={refreshKey} />
+            <CompanyFeed userId={userId} refreshKey={refreshKey} />
+            <PitchHistory userId={userId} refreshKey={refreshKey} />
           </>
         ) : (
           <RecruiterView refreshKey={refreshKey} />

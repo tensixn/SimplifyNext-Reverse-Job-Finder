@@ -106,6 +106,7 @@ export default async function handler(req, res) {
   });
 
   const data = await response.json();
+  console.log('ANTHROPIC RESPONSE:', JSON.stringify(data));
   const text = data.content?.find((c) => c.type === 'text')?.text?.trim();
 
   let points;

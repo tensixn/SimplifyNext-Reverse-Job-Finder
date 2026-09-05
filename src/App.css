@@ -1172,6 +1172,45 @@ button.ghost.small:hover:not(:disabled) {
   .app-top { flex-direction: column; gap: 16px; }
   .app-top h1 { font-size: 28px; }
   .reset-button { align-self: flex-start; }
+
+  /* ===== Auth ===== */
+.app-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.signed-in-as {
+  font-size: var(--text-caption);
+  color: var(--text-quiet);
+  font-family: var(--font-mono);
+}
+
+.auth-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.auth-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  max-width: 480px;
+}
+
+.auth-card {
+  width: 100%;
+  margin-top: 0;
+}
+
+.auth-form input {
+  min-width: 0;
+}
+
   .profile-header, .feed-header, .recruiter-header { flex-direction: column; align-items: flex-start; gap: 10px; }
   .recruiter-header .dropdown,
   .recruiter-header .dropdown-trigger { width: 100%; }
